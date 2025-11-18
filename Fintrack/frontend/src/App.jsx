@@ -1,4 +1,3 @@
-// src/App.jsx
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./auth/AuthProvider";
@@ -8,6 +7,7 @@ import Login from "./pages/Login";
 import Home from "./pages/Home";
 import ImportarCSV from "./pages/ImportarCSV";
 import ValidarCSV from "./pages/ValidarCSV";
+import Landing from "./pages/Landing";
 
 export default function App() {
   return (
@@ -15,7 +15,17 @@ export default function App() {
       <AuthProvider>
         <Routes>
           {/* Ruta pública: login */}
+          <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
+
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Ruta protegida: home */}
           <Route

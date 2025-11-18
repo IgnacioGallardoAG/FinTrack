@@ -8,34 +8,88 @@ export default function Home() {
 
   const handleLogout = () => {
     logout();
-    navigate("/login", { replace: true });
+    navigate("/", { replace: true }); 
   };
 
   return (
-    <div className="app-shell">
-      {/* Topbar */}
-      <header className="topbar">
-        <div>
-          <div className="topbar-title">FinTrack</div>
-          <div className="topbar-subtitle">Resumen general de tus movimientos</div>
+    <div style={{ minHeight: "100vh", background: "#f3f4f6" }}>
+
+      {/* NAVBAR IGUAL QUE LANDING */}
+      <header
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "1rem 3rem",
+          backgroundColor: "#4F46E5",
+          color: "white",
+        }}
+      >
+        {/* LOGO */}
+        <div
+          style={{
+            fontSize: "1.5rem",
+            fontWeight: "bold",
+            cursor: "pointer",
+          }}
+          onClick={() => navigate("/dashboard")}
+        >
+          FinTrack
         </div>
 
-        <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-          <button className="btn btn-secondary" onClick={handleLogout}>
-            Cerrar sesión
+        {/* MENÚ DEL DASHBOARD */}
+        <nav
+          style={{
+            display: "flex",
+            gap: "2rem",
+            fontSize: "1rem",
+            alignItems: "center",
+          }}
+        >
+          <button style={menuBtn} onClick={() => navigate("/importar")}>
+            Importar CSV
           </button>
-          <button className="hamburger" aria-label="Menú principal">
-            <span />
-            <span />
-            <span />
+
+          <button style={menuBtn} onClick={() => navigate("/validar")}>
+            Validación
           </button>
-        </div>
+
+          <button style={menuBtn}>
+            Resumen General
+          </button>
+
+          <button style={menuBtn}>
+            Gráficos
+          </button>
+        </nav>
+
+        {/* CERRAR SESIÓN */}
+        <button
+          onClick={handleLogout}
+          style={{
+            padding: "0.5rem 1rem",
+            background: "white",
+            color: "#4F46E5",
+            borderRadius: "8px",
+            border: "none",
+            fontWeight: "bold",
+            cursor: "pointer",
+          }}
+        >
+          Cerrar sesión
+        </button>
       </header>
 
-      {/* Contenido */}
-      <main className="app-content">
+      {/* CONTENIDO PRINCIPAL */}
+      <main style={{ padding: "2rem 3rem" }}>
+        
+        {/* Título */}
+        <h1 style={{ fontSize: "1.8rem", marginBottom: "1rem" }}>
+          Resumen General
+        </h1>
+
         <div className="grid-2">
-          {/* Resumen de datos */}
+          {/* Resumen mensual */}
           <section className="card">
             <h2 className="card-title">Resumen mensual</h2>
             <p className="card-subtitle">Ejemplo de datos cargados (mock).</p>
@@ -43,7 +97,7 @@ export default function Home() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                gridTemplateColumns: "repeat(3, 1fr)",
                 gap: "0.75rem",
                 marginBottom: "1rem",
                 marginTop: "0.75rem",
@@ -63,6 +117,7 @@ export default function Home() {
               </div>
             </div>
 
+            {/* Tabla de transacciones */}
             <table className="table">
               <thead>
                 <tr>
@@ -97,20 +152,25 @@ export default function Home() {
             </table>
           </section>
 
-          {/* Acciones CSV */}
+          {/* GRÁFICO (mock) */}
           <section className="card">
-            <h2 className="card-title">Importar y validar CSV</h2>
-            <p className="card-subtitle">
-              Usa estas opciones para cargar movimientos desde tu banco o planilla.
-            </p>
+            <h2 className="card-title">Gráfico mensual</h2>
+            <p className="card-subtitle">Este gráfico luego se conectará al CSV importado.</p>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "1rem" }}>
-              <button className="btn btn-primary" onClick={() => navigate("/importar")}>
-                Importar archivo CSV
-              </button>
-              <button className="btn btn-secondary" onClick={() => navigate("/validar")}>
-                Validar última importación
-              </button>
+            <div
+              style={{
+                width: "100%",
+                height: "300px",
+                background: "#e5e7eb",
+                borderRadius: "14px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#6b7280",
+                marginTop: "1rem",
+              }}
+            >
+              (Aquí irá el gráfico real)
             </div>
           </section>
         </div>
@@ -118,3 +178,11 @@ export default function Home() {
     </div>
   );
 }
+
+const menuBtn = {
+  background: "transparent",
+  color: "white",
+  border: "none",
+  cursor: "pointer",
+  fontSize: "1rem",
+};
