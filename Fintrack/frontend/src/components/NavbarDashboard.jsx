@@ -7,11 +7,12 @@ export default function NavbarDashboard({
   onSelectMenu,
   onSelectResumen,
   onSelectGraficos,
-  useInternalState = false
+  useInternalState = true, // por defecto el Home usa estado interno
 }) {
   const navigate = useNavigate();
   const { logout } = useAuth();
 
+  // Para redirigir desde páginas externas (importar / validar)
   const goToHomeWithView = (vista) => {
     navigate(`/dashboard?vista=${vista}`);
   };
@@ -39,7 +40,7 @@ export default function NavbarDashboard({
         FinTrack
       </div>
 
-      {/* MENÚ */}
+      {/* MENÚ PRINCIPAL */}
       <nav
         style={{
           display: "flex",
@@ -48,7 +49,7 @@ export default function NavbarDashboard({
           alignItems: "center",
         }}
       >
-        {/* ---- MENÚ ---- */}
+        {/* MENÚ */}
         <button
           style={menuBtn}
           onClick={() =>
@@ -58,36 +59,37 @@ export default function NavbarDashboard({
           Menú
         </button>
 
-        {/* ---- RESUMEN ---- */}
+        {/* RESUMEN */}
         <button
           style={menuBtn}
           onClick={() =>
-            useInternalState ? onSelectResumen() : goToHomeWithView("resumen")
+            useInternalState
+              ? onSelectResumen()
+              : goToHomeWithView("resumen")
           }
         >
           Resumen General
         </button>
 
-        {/* ---- GRÁFICOS ---- */}
+        {/* GRÁFICOS */}
         <button
           style={menuBtn}
           onClick={() =>
-            useInternalState ? onSelectGraficos() : goToHomeWithView("graficos")
+            useInternalState
+              ? onSelectGraficos()
+              : goToHomeWithView("graficos")
           }
         >
           Gráficos
         </button>
 
-        {/* ---- IMPORTAR CSV ---- */}
-        <button
-          style={menuBtn}
-          onClick={() => navigate("/importar")}
-        >
+        {/* IMPORTAR CSV */}
+        <button style={menuBtn} onClick={() => navigate("/importar")}>
           Importar CSV
         </button>
       </nav>
 
-      {/* ---- CERRAR SESIÓN ---- */}
+      {/* CERRAR SESIÓN */}
       <button
         onClick={() => {
           logout();
@@ -113,7 +115,7 @@ NavbarDashboard.propTypes = {
   onSelectMenu: PropTypes.func,
   onSelectResumen: PropTypes.func,
   onSelectGraficos: PropTypes.func,
-  useInternalState: PropTypes.bool
+  useInternalState: PropTypes.bool,
 };
 
 const menuBtn = {

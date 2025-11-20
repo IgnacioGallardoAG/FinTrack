@@ -1,32 +1,27 @@
-import React, { useState } from "react";
+import NavbarDashboard from "../components/NavbarDashboard";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 export default function ImportarCSV() {
   const [fileName, setFileName] = useState(null);
+  const navigate = useNavigate();
 
   const handleFileChange = (event) => {
     const file = event.target.files?.[0];
     if (file) {
       setFileName(file.name);
-      // aquí luego llamas a tu API para subirlo
     }
   };
 
   return (
-    <div className="app-shell">
-      <header className="topbar">
-        <div>
-          <div className="topbar-title">Importar CSV</div>
-          <div className="topbar-subtitle">
-            Carga un archivo con tus movimientos para agregarlos a FinTrack.
-          </div>
-        </div>
-      </header>
+    <div>
+      <NavbarDashboard useInternalState={false} />
 
       <main className="app-content">
         <div className="card" style={{ maxWidth: 600, margin: "0 auto" }}>
-          <h2 className="card-title">Seleccionar archivo</h2>
+          <h2 className="card-title">Importar CSV</h2>
           <p className="card-subtitle">
-            Formato esperado: <code>fecha, monto, descripción, categoría, tipo</code>
+            Sube un archivo CSV con tus movimientos. Luego podrás validarlo.
           </p>
 
           <div
@@ -38,23 +33,28 @@ export default function ImportarCSV() {
               textAlign: "center",
             }}
           >
-            <p className="card-subtitle" style={{ marginBottom: "0.75rem" }}>
-              Arrastra tu archivo CSV aquí o selecciónalo desde tu equipo.
-            </p>
-            <input
-              type="file"
-              accept=".csv"
-              onChange={handleFileChange}
-              style={{ marginBottom: "0.75rem" }}
-            />
+            <input type="file" accept=".csv" onChange={handleFileChange} />
+
             {fileName && (
-              <p style={{ fontSize: "0.8rem", color: "#4b5563" }}>Archivo seleccionado: {fileName}</p>
+              <p style={{ fontSize: "0.8rem", marginTop: "0.5rem" }}>
+                Archivo seleccionado: {fileName}
+              </p>
             )}
           </div>
 
           <button className="btn btn-primary" style={{ marginTop: "1rem" }}>
             Subir e importar
           </button>
+
+          {fileName && (
+            <button
+              className="btn btn-secondary"
+              style={{ marginTop: "1rem" }}
+              onClick={() => navigate("/validar")}
+            >
+              Validar importación
+            </button>
+          )}
         </div>
       </main>
     </div>
