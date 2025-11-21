@@ -1,125 +1,82 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../auth/AuthProvider";
-import PropTypes from "prop-types";
+import NavbarDashboard from "../components/NavbarDashboard";
+import Footer from "../components/Footer";
 
-export default function NavbarDashboard({
-  onSelectMenu,
-  onSelectResumen,
-  onSelectGraficos,
-  useInternalState = false
-}) {
-  const navigate = useNavigate();
-  const { logout } = useAuth();
+export default function ValidarCSV() {
 
-  const goToHomeWithView = (vista) => {
-    navigate(`/dashboard?vista=${vista}`);
-  };
+  // Ejemplo de errores mock – más adelante vienen del backend
+  const erroresMock = [
+    { fila: 3, campo: "monto", detalle: "Valor no numérico" },
+    { fila: 7, campo: "fecha", detalle: "Formato inválido (usar YYYY-MM-DD)" },
+  ];
 
   return (
-    <header
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: "1rem 3rem",
-        backgroundColor: "#4F46E5",
-        color: "white",
-      }}
-    >
-      {/* LOGO */}
-      <div
-        style={{
-          fontSize: "1.5rem",
-          fontWeight: "bold",
-          cursor: "pointer",
-        }}
-        onClick={() => navigate("/dashboard")}
-      >
-        FinTrack
-      </div>
+    <div style={{ minHeight: "100vh", background: "#f3f4f6", display: "flex", flexDirection: "column" }}>
+      <NavbarDashboard useInternalState={false} />
 
-      {/* MENÚ */}
-      <nav
-        style={{
-          display: "flex",
-          gap: "2rem",
-          fontSize: "1rem",
-          alignItems: "center",
-        }}
-      >
-        {/* ---- MENÚ ---- */}
-        <button
-          style={menuBtn}
-          onClick={() =>
-            useInternalState ? onSelectMenu() : goToHomeWithView("menu")
-          }
-        >
-          Menú
-        </button>
+      <main className="app-content" style={{ flex: 1 }}>
+        <div className="grid-2" style={{ marginTop: "2rem" }}>
 
-        {/* ---- RESUMEN ---- */}
-        <button
-          style={menuBtn}
-          onClick={() =>
-            useInternalState ? onSelectResumen() : goToHomeWithView("resumen")
-          }
-        >
-          Resumen General
-        </button>
+          {/* Vista previa */}
+          <section className="card">
+            <h2 className="card-title">Vista previa del CSV</h2>
+            <p className="card-subtitle">
+              Aquí luego mostrarás las primeras filas cargadas correctamente.
+            </p>
 
-        {/* ---- GRÁFICOS ---- */}
-        <button
-          style={menuBtn}
-          onClick={() =>
-            useInternalState ? onSelectGraficos() : goToHomeWithView("graficos")
-          }
-        >
-          Gráficos
-        </button>
+            <table className="table" style={{ marginTop: "0.75rem" }}>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Monto</th>
+                  <th>Descripción</th>
+                  <th>Categoría</th>
+                  <th>Tipo</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>2025-10-01</td>
+                  <td>800000</td>
+                  <td>Sueldo</td>
+                  <td>Ingreso</td>
+                  <td>Ingreso</td>
+                </tr>
+                <tr>
+                  <td>2025-10-02</td>
+                  <td>-45000</td>
+                  <td>Supermercado</td>
+                  <td>Alimentación</td>
+                  <td>Gasto</td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
 
-        {/* ---- IMPORTAR CSV ---- */}
-        <button
-          style={menuBtn}
-          onClick={() => navigate("/importar")}
-        >
-          Importar CSV
-        </button>
-      </nav>
+          {/* Errores detectados */}
+          <section className="card">
+            <h2 className="card-title">Errores detectados</h2>
+            <p className="card-subtitle">
+              Corrige estos valores antes de confirmar la importación.
+            </p>
 
-      {/* ---- CERRAR SESIÓN ---- */}
-      <button
-        onClick={() => {
-          logout();
-          navigate("/", { replace: true });
-        }}
-        style={{
-          padding: "0.5rem 1rem",
-          background: "white",
-          color: "#4F46E5",
-          borderRadius: "8px",
-          border: "none",
-          fontWeight: "bold",
-          cursor: "pointer",
-        }}
-      >
-        Cerrar sesión
-      </button>
-    </header>
+            <ul style={{ marginTop: "0.75rem", paddingLeft: "1.1rem" }}>
+              {erroresMock.map((err, idx) => (
+                <li key={idx} style={{ fontSize: "0.9rem", marginBottom: "0.25rem" }}>
+                  <strong>Fila {err.fila}</strong> – {err.campo}: {err.detalle}
+                </li>
+              ))}
+            </ul>
+
+            <button className="btn btn-primary" style={{ marginTop: "1rem" }}>
+              Confirmar importación
+            </button>
+          </section>
+
+        </div>
+      </main>
+
+      <Footer />
+    </div>
   );
 }
-
-NavbarDashboard.propTypes = {
-  onSelectMenu: PropTypes.func,
-  onSelectResumen: PropTypes.func,
-  onSelectGraficos: PropTypes.func,
-  useInternalState: PropTypes.bool
-};
-
-const menuBtn = {
-  background: "transparent",
-  color: "white",
-  border: "none",
-  cursor: "pointer",
-  fontSize: "1rem",
-};

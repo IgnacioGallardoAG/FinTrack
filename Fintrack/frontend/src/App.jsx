@@ -14,10 +14,12 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* Ruta pública: login */}
+          
+          {/* RUTAS PÚBLICAS */}
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
 
+          {/* RUTAS PROTEGIDAS */}
           <Route
             path="/dashboard"
             element={
@@ -27,17 +29,6 @@ export default function App() {
             }
           />
 
-          {/* Ruta protegida: home */}
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Home />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* Importar CSV */}
           <Route
             path="/importar"
             element={
@@ -47,7 +38,6 @@ export default function App() {
             }
           />
 
-          {/* Validar CSV */}
           <Route
             path="/validar"
             element={
@@ -57,8 +47,9 @@ export default function App() {
             }
           />
 
-          {/* fallback */}
+          {/* CATCH ALL — si no existe la ruta vuelve al landing */}
           <Route path="*" element={<Navigate to="/" replace />} />
+
         </Routes>
       </AuthProvider>
     </BrowserRouter>

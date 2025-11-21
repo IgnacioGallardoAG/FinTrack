@@ -7,12 +7,11 @@ export default function NavbarDashboard({
   onSelectMenu,
   onSelectResumen,
   onSelectGraficos,
-  useInternalState = true, // por defecto el Home usa estado interno
+  useInternalState = true, // Home usa estado interno, otras páginas navegan
 }) {
   const navigate = useNavigate();
   const { logout } = useAuth();
 
-  // Para redirigir desde páginas externas (importar / validar)
   const goToHomeWithView = (vista) => {
     navigate(`/dashboard?vista=${vista}`);
   };
@@ -53,7 +52,7 @@ export default function NavbarDashboard({
         <button
           style={menuBtn}
           onClick={() =>
-            useInternalState ? onSelectMenu() : goToHomeWithView("menu")
+            useInternalState ? onSelectMenu?.() : goToHomeWithView("menu")
           }
         >
           Menú
@@ -64,7 +63,7 @@ export default function NavbarDashboard({
           style={menuBtn}
           onClick={() =>
             useInternalState
-              ? onSelectResumen()
+              ? onSelectResumen?.()
               : goToHomeWithView("resumen")
           }
         >
@@ -76,7 +75,7 @@ export default function NavbarDashboard({
           style={menuBtn}
           onClick={() =>
             useInternalState
-              ? onSelectGraficos()
+              ? onSelectGraficos?.()
               : goToHomeWithView("graficos")
           }
         >

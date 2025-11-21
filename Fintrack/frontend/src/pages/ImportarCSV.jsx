@@ -1,6 +1,7 @@
-import NavbarDashboard from "../components/NavbarDashboard";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import NavbarDashboard from "../components/NavbarDashboard";
+import Footer from "../components/Footer";
 
 export default function ImportarCSV() {
   const [fileName, setFileName] = useState(null);
@@ -14,11 +15,11 @@ export default function ImportarCSV() {
   };
 
   return (
-    <div>
+    <div style={{ minHeight: "100vh", background: "#f3f4f6", display: "flex", flexDirection: "column" }}>
       <NavbarDashboard useInternalState={false} />
 
-      <main className="app-content">
-        <div className="card" style={{ maxWidth: 600, margin: "0 auto" }}>
+      <main className="app-content" style={{ flex: 1 }}>
+        <div className="card" style={{ maxWidth: 600, margin: "2rem auto" }}>
           <h2 className="card-title">Importar CSV</h2>
           <p className="card-subtitle">
             Sube un archivo CSV con tus movimientos. Luego podrás validarlo.
@@ -57,6 +58,8 @@ export default function ImportarCSV() {
           )}
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }

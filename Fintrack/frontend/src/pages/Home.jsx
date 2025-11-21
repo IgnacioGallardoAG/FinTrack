@@ -1,28 +1,64 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import NavbarDashboard from "../components/NavbarDashboard";
+import Footer from "../components/Footer";
 
 export default function Home() {
-  const [vistaActual, setVistaActual] = useState("menu"); 
-  // valores posibles: "menu" | "resumen" | "graficos"
+  const [vistaActual, setVistaActual] = useState("menu"); // "menu" | "resumen" | "graficos"
+  const [isLoading, setIsLoading] = useState(false);
+  const location = useLocation();
+
+  // Lee ?vista=menu|resumen|graficos desde la URL
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const vista = params.get("vista");
+    if (vista === "menu" || vista === "resumen" || vista === "graficos") {
+      setVistaActual(vista);
+    }
+  }, [location.search]);
+
+  const cambiarVista = (nuevaVista) => {
+    if (nuevaVista === vistaActual) return;
+    setIsLoading(true);
+    setTimeout(() => {
+      setVistaActual(nuevaVista);
+      setIsLoading(false);
+    }, 400); // pequeño delay para sensación de carga
+  };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f3f4f6" }}>
-
+    <div style={{ minHeight: "100vh", background: "#f3f4f6", display: "flex", flexDirection: "column" }}>
       <NavbarDashboard
-        onSelectResumen={() => setVistaActual("resumen")}
-        onSelectGraficos={() => setVistaActual("graficos")}
-        onSelectMenu={() => setVistaActual("menu")}
+        onSelectResumen={() => cambiarVista("resumen")}
+        onSelectGraficos={() => cambiarVista("graficos")}
+        onSelectMenu={() => cambiarVista("menu")}
         useInternalState={true}
       />
 
-      <main style={{ padding: "2rem 3rem" }}>
-        
-        {/* CONTROL DE VISUALIZACIÓN */}
-        {vistaActual === "menu" && <MenuCompleto />}
-        {vistaActual === "resumen" && <SoloResumen />}
-        {vistaActual === "graficos" && <SoloGraficos />}
-
+      <main style={{ padding: "2rem 3rem", flex: 1 }}>
+        {isLoading ? (
+          <div
+            style={{
+              minHeight: "50vh",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <div className="card" style={{ padding: "1.5rem 2rem", textAlign: "center" }}>
+              <p className="card-subtitle">Cargando vista...</p>
+            </div>
+          </div>
+        ) : (
+          <>
+            {vistaActual === "menu" && <MenuCompleto />}
+            {vistaActual === "resumen" && <SoloResumen />}
+            {vistaActual === "graficos" && <SoloGraficos />}
+          </>
+        )}
       </main>
+
+      <Footer />
     </div>
   );
 }
@@ -76,17 +112,23 @@ function SoloResumen() {
           <tbody>
             <tr>
               <td>Supermercado</td>
-              <td><span className="badge badge-expense">- $45.000</span></td>
+              <td>
+                <span className="badge badge-expense">- $45.000</span>
+              </td>
               <td>Alimentación</td>
             </tr>
             <tr>
               <td>Sueldo</td>
-              <td><span className="badge badge-income">+ $800.000</span></td>
+              <td>
+                <span className="badge badge-income">+ $800.000</span>
+              </td>
               <td>Ingreso</td>
             </tr>
             <tr>
               <td>Transporte</td>
-              <td><span className="badge badge-expense">- $20.000</span></td>
+              <td>
+                <span className="badge badge-expense">- $20.000</span>
+              </td>
               <td>Movilidad</td>
             </tr>
           </tbody>
@@ -137,7 +179,6 @@ function MenuCompleto() {
       <h1 style={{ fontSize: "1.8rem", marginBottom: "1rem" }}>Dashboard</h1>
 
       <div className="grid-2">
-
         {/* Resumen mensual */}
         <section className="card">
           <h2 className="card-title">Resumen mensual</h2>
@@ -180,17 +221,23 @@ function MenuCompleto() {
             <tbody>
               <tr>
                 <td>Supermercado</td>
-                <td><span className="badge badge-expense">- $45.000</span></td>
+                <td>
+                  <span className="badge badge-expense">- $45.000</span>
+                </td>
                 <td>Alimentación</td>
               </tr>
               <tr>
                 <td>Sueldo</td>
-                <td><span className="badge badge-income">+ $800.000</span></td>
+                <td>
+                  <span className="badge badge-income">+ $800.000</span>
+                </td>
                 <td>Ingreso</td>
               </tr>
               <tr>
                 <td>Transporte</td>
-                <td><span className="badge badge-expense">- $20.000</span></td>
+                <td>
+                  <span className="badge badge-expense">- $20.000</span>
+                </td>
                 <td>Movilidad</td>
               </tr>
             </tbody>
@@ -218,7 +265,6 @@ function MenuCompleto() {
             (Aquí irá el gráfico real)
           </div>
         </section>
-
       </div>
     </>
   );
