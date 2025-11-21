@@ -1,35 +1,57 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./auth/AuthProvider";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-function App() {
-  const [count, setCount] = useState(0)
+import Login from "./pages/Login";
+import Home from "./pages/Home";
+import ImportarCSV from "./pages/ImportarCSV";
+import ValidarCSV from "./pages/ValidarCSV";
+import Landing from "./pages/Landing";
 
+export default function App() {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          
+          {/* RUTAS PÚBLICAS */}
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
 
-export default App
+          {/* RUTAS PROTEGIDAS */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/importar"
+            element={
+              <ProtectedRoute>
+                <ImportarCSV />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/validar"
+            element={
+              <ProtectedRoute>
+                <ValidarCSV />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* CATCH ALL — si no existe la ruta vuelve al landing */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}
