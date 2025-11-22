@@ -1,25 +1,22 @@
-import React from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./auth/AuthProvider";
 import ProtectedRoute from "./components/ProtectedRoute";
 
-import Login from "./pages/Login";
 import Home from "./pages/Home";
 import ImportarCSV from "./pages/ImportarCSV";
-import ValidarCSV from "./pages/ValidarCSV";
 import Landing from "./pages/Landing";
+import ValidarCSV from "./pages/ValidarCSV";
 
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          
-          {/* RUTAS PÚBLICAS */}
-          <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Login />} />
 
-          {/* RUTAS PROTEGIDAS */}
+          {/* PÚBLICAS */}
+          <Route path="/" element={<Landing />} />
+
+          {/* PROTEGIDAS */}
           <Route
             path="/dashboard"
             element={
@@ -47,7 +44,7 @@ export default function App() {
             }
           />
 
-          {/* CATCH ALL — si no existe la ruta vuelve al landing */}
+          {/* CATCH ALL */}
           <Route path="*" element={<Navigate to="/" replace />} />
 
         </Routes>

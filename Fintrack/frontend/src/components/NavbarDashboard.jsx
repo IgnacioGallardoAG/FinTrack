@@ -1,7 +1,6 @@
-import React from "react";
+import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
-import PropTypes from "prop-types";
 
 export default function NavbarDashboard({
   onSelectMenu,
@@ -92,7 +91,6 @@ export default function NavbarDashboard({
       <button
         onClick={() => {
           logout();
-          navigate("/", { replace: true });
         }}
         style={{
           padding: "0.5rem 1rem",

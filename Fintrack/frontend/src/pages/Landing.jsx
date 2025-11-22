@@ -1,11 +1,12 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
-import bgImage from "../assets/imagenprueba.jpg";             // Fondo del hero
 import funcionalidadesImg from "../assets/funcionalidades.jpg"; // Imagen funcionalidades
+import bgImage from "../assets/imagenprueba.jpg"; // Fondo del hero
+import { useAuth } from "../auth/AuthProvider";
 import Footer from "../components/Footer";
 
 export default function Landing() {
   const navigate = useNavigate();
+  const {login} = useAuth();
 
   const scrollToId = (id) => {
     const el = document.getElementById(id);
@@ -48,7 +49,9 @@ export default function Landing() {
 
         {/* BOTÓN DE LOGIN */}
         <button
-          onClick={() => navigate("/login")}
+          onClick={() =>
+            login({ redirectUri: "http://localhost:5173/dashboard" })
+          }
           style={{
             padding: "0.5rem 1rem",
             background: "white",
