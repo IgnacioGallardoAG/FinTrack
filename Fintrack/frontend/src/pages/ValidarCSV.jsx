@@ -1,12 +1,13 @@
-import { useLocation } from "react-router-dom";
-import api from "../api/apiClient";
+import { useLocation, useNavigate } from "react-router-dom";
+import { importCSV } from "../api/apiClient";
 import Footer from "../components/Footer";
 import NavbarDashboard from "../components/NavbarDashboard";
 
 export default function ValidarCSV() {
+  const navigate = useNavigate();
   const { state } = useLocation();
 
-  // Si no llegaron datos (usuario entró directo), mostramos error
+  // Si no llegaron datos (usuario entró directo)
   if (!state) {
     return (
       <div>
@@ -19,19 +20,33 @@ export default function ValidarCSV() {
     );
   }
 
-  const { preview, errors, fileName } = state;
+  // Datos provenientes de validateCSV()
+  const {
+    preview,
+    validRows,
+    invalidRows,
+    errorRows,
+    errors,
+    isValid,
+    fileName,
+    originalFile, // ← Lo enviaremos desde ImportarCSV.jsx
+    totalRows,
+    validCount,
+    invalidCount,
+  } = state;
 
   const handleImport = async () => {
     try {
-      const form = new FormData();
-      form.append("file", state.originalFile); // si lo quisieras poner
+      const result = await importCSV(originalFile);
 
-      const res = await api.post("/import", form);
+      alert(result.summary);
 
-      alert(`Importación completada: ${res.data.imported} filas importadas.`);
+      // Redirigir al dashboard o donde quieras
+      navigate("/dashboard");
+
     } catch (error) {
       console.error("Error al confirmar importación:", error);
-      alert("No se pudo completar la importación");
+      alert(error.error || "No se pudo completar la importación");
     }
   };
 
@@ -39,15 +54,26 @@ export default function ValidarCSV() {
     <div style={{ minHeight: "100vh", background: "#f3f4f6", display: "flex", flexDirection: "column" }}>
       <NavbarDashboard useInternalState={false} />
 
-      <main className="app-content" style={{ flex: 1 }}>
-        <div className="grid-2" style={{ marginTop: "2rem" }}>
+      <main className="app-content" style={{ flex: 1, padding: "2rem" }}>
+        
+        <h2 className="card-title">Resultado de la Validación</h2>
+        <p className="card-subtitle">Archivo: {fileName}</p>
+
+        {/* --- RESUMEN --- */}
+        <section className="card" style={{ marginTop: "1rem" }}>
+          <h3 className="card-title">Resumen</h3>
+          <ul>
+            <li>Total filas: {totalRows}</li>
+            <li>Válidas: {validCount}</li>
+            <li>Inválidas: {invalidCount}</li>
+          </ul>
+        </section>
+
+        <div className="grid-2" style={{ marginTop: "1rem" }}>
           
-          {/* Vista previa */}
+          {/* --- PREVIEW --- */}
           <section className="card">
-            <h2 className="card-title">Vista previa del CSV</h2>
-            <p className="card-subtitle">
-              Aquí se muestran las primeras filas que el backend detectó.
-            </p>
+            <h3 className="card-title">Vista previa (primeras filas válidas)</h3>
 
             <table className="table" style={{ marginTop: "0.75rem" }}>
               <thead>
@@ -71,33 +97,48 @@ export default function ValidarCSV() {
             </table>
           </section>
 
-          {/* Errores */}
+          {/* --- ERRORES ESTRUCTURALES --- */}
           <section className="card">
-            <h2 className="card-title">Errores detectados</h2>
+            <h3 className="card-title">Errores generales</h3>
 
             {errors.length === 0 ? (
-              <p>No se encontraron errores.</p>
+              <p>No hay errores de estructura.</p>
             ) : (
-              <ul style={{ marginTop: "0.75rem", paddingLeft: "1.1rem" }}>
+              <ul>
                 {errors.map((err, idx) => (
-                  <li key={idx} style={{ fontSize: "0.9rem", marginBottom: "0.25rem" }}>
-                    {err}
-                  </li>
+                  <li key={idx}>{err}</li>
                 ))}
               </ul>
             )}
-
-            {/* Permitir importar solo si es válido */}
-            <button
-              className="btn btn-primary"
-              style={{ marginTop: "1rem" }}
-              disabled={errors.length > 0}
-              onClick={handleImport}
-            >
-              Confirmar importación
-            </button>
           </section>
         </div>
+
+        {/* --- ERRORES POR FILA --- */}
+        <section className="card" style={{ marginTop: "1rem" }}>
+          <h3 className="card-title">Errores por fila</h3>
+
+          {errorRows.length === 0 ? (
+            <p>No hay filas con errores.</p>
+          ) : (
+            <ul>
+              {errorRows.map((row, idx) => (
+                <li key={idx}>
+                  <strong>Fila {row.row}</strong>: {row.errors.join(", ")}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        {/* --- BOTÓN IMPORTAR --- */}
+        <button
+          className="btn btn-primary"
+          style={{ marginTop: "2rem", width: "100%" }}
+          disabled={!isValid}
+          onClick={handleImport}
+        >
+          Confirmar importación
+        </button>
       </main>
 
       <Footer />
