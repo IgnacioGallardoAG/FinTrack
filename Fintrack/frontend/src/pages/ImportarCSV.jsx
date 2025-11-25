@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { validateCSV } from "../api/apiClient";
+import apiClient from "../api/apiClient";
 import Footer from "../components/Footer";
 import NavbarDashboard from "../components/NavbarDashboard";
 
@@ -25,14 +25,19 @@ export default function ImportarCSV() {
     setLoading(true);
 
     try {
-      const validation = await validateCSV(file);
+      const formData = new FormData();
+      formData.append("file", file);
 
-      //Llevar resultado completo a ValidarCSV.jsx
-      navigate("/validar", { state: { ...validation, originalFile: file } });
+      const res = await apiClient.post("/api/validate", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      // Llevar el resultado a ValidarCSV.jsx
+      navigate("/validar", { state: { ...res.data, originalFile: file } });
 
     } catch (error) {
       console.error("Error al validar CSV:", error);
-      alert(error.error || "Error al validar el archivo");
+      alert("Error al validar el archivo");
     } finally {
       setLoading(false);
     }
@@ -56,7 +61,7 @@ export default function ImportarCSV() {
               textAlign: "center",
             }}
           >
-            <input type="file" accept=".csv" onChange={handleFileChange} />
+            <input type="file" accept=".csv, .xlsx" onChange={handleFileChange} />
 
             {fileName && (
               <p style={{ fontSize: "0.8rem", marginTop: "0.5rem" }}>

@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { importCSV } from "../api/apiClient";
+import apiClient from "../api/apiClient";
 import Footer from "../components/Footer";
 import NavbarDashboard from "../components/NavbarDashboard";
 
@@ -7,7 +7,6 @@ export default function ValidarCSV() {
   const navigate = useNavigate();
   const { state } = useLocation();
 
-  // Si no llegaron datos (usuario entró directo)
   if (!state) {
     return (
       <div>
@@ -20,7 +19,6 @@ export default function ValidarCSV() {
     );
   }
 
-  // Datos provenientes de validateCSV()
   const {
     preview,
     validRows,
@@ -29,7 +27,7 @@ export default function ValidarCSV() {
     errors,
     isValid,
     fileName,
-    originalFile, // ← Lo enviaremos desde ImportarCSV.jsx
+    originalFile,
     totalRows,
     validCount,
     invalidCount,
@@ -37,16 +35,19 @@ export default function ValidarCSV() {
 
   const handleImport = async () => {
     try {
-      const result = await importCSV(originalFile);
+      const formData = new FormData();
+      formData.append("file", originalFile);
 
-      alert(result.summary);
+      const res = await apiClient.post("/api/import", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-      // Redirigir al dashboard o donde quieras
+      alert("Importación completada");
       navigate("/dashboard");
 
     } catch (error) {
       console.error("Error al confirmar importación:", error);
-      alert(error.error || "No se pudo completar la importación");
+      alert("No se pudo completar la importación");
     }
   };
 
@@ -55,11 +56,9 @@ export default function ValidarCSV() {
       <NavbarDashboard useInternalState={false} />
 
       <main className="app-content" style={{ flex: 1, padding: "2rem" }}>
-        
         <h2 className="card-title">Resultado de la Validación</h2>
         <p className="card-subtitle">Archivo: {fileName}</p>
 
-        {/* --- RESUMEN --- */}
         <section className="card" style={{ marginTop: "1rem" }}>
           <h3 className="card-title">Resumen</h3>
           <ul>
@@ -70,11 +69,8 @@ export default function ValidarCSV() {
         </section>
 
         <div className="grid-2" style={{ marginTop: "1rem" }}>
-          
-          {/* --- PREVIEW --- */}
           <section className="card">
-            <h3 className="card-title">Vista previa (primeras filas válidas)</h3>
-
+            <h3 className="card-title">Vista previa</h3>
             <table className="table" style={{ marginTop: "0.75rem" }}>
               <thead>
                 {preview[0] && (
@@ -97,12 +93,10 @@ export default function ValidarCSV() {
             </table>
           </section>
 
-          {/* --- ERRORES ESTRUCTURALES --- */}
           <section className="card">
             <h3 className="card-title">Errores generales</h3>
-
             {errors.length === 0 ? (
-              <p>No hay errores de estructura.</p>
+              <p>No hay errores</p>
             ) : (
               <ul>
                 {errors.map((err, idx) => (
@@ -113,12 +107,10 @@ export default function ValidarCSV() {
           </section>
         </div>
 
-        {/* --- ERRORES POR FILA --- */}
         <section className="card" style={{ marginTop: "1rem" }}>
           <h3 className="card-title">Errores por fila</h3>
-
           {errorRows.length === 0 ? (
-            <p>No hay filas con errores.</p>
+            <p>No hay errores por fila.</p>
           ) : (
             <ul>
               {errorRows.map((row, idx) => (
@@ -130,7 +122,6 @@ export default function ValidarCSV() {
           )}
         </section>
 
-        {/* --- BOTÓN IMPORTAR --- */}
         <button
           className="btn btn-primary"
           style={{ marginTop: "2rem", width: "100%" }}

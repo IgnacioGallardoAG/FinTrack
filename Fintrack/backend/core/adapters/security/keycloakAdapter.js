@@ -2,15 +2,10 @@ import { SecurityPort } from '../../ports/securityPort.js';
 
 export class KeycloakAdapter extends SecurityPort {
     extractUserId(req) {
-        const token = req?.kauth?.grant?.access_token;
-
-        if (!token) {
-            throw new Error('No se encontró token en la solicitud');
+        if (!req.user || !req.user.id) {
+            throw new Error('No se encontró usuario en req.user. ¿Falta middleware auth?');
         }
 
-        const content = token.content;
-
-        // "sub" = ID único de Keycloak
-        return content.sub;
+        return req.user.id;
     }
 }

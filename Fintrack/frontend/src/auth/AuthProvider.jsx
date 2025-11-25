@@ -1,14 +1,9 @@
-import Keycloak from "keycloak-js";
+// src/auth/AuthProvider.jsx
 import PropTypes from "prop-types";
 import { createContext, useContext, useEffect, useState } from "react";
+import keycloakService from "./keycloakService";
 
 const AuthContext = createContext(null);
-
-const keycloak = new Keycloak({
-  url: "http://localhost:8080/",
-  realm: "fintrack",
-  clientId: "frontend-client",
-});
 
 export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -16,20 +11,25 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    keycloak
-      .init({ onLoad: "check-sso", pkceMethod: "S256" })
-      .then(async (authenticated) => {
+    async function init() {
+      try {
+        const authenticated = await keycloakService.init();
         setIsAuthenticated(authenticated);
+
         if (authenticated) {
-          const userInfo = await keycloak.loadUserInfo();
-          setProfile(userInfo);
+          const info = await keycloakService.getProfile();
+          setProfile(info);
         }
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    init();
   }, []);
 
-  const login = (opts) => keycloak.login(opts);
-  const logout = () => keycloak.logout();
+  const login = (opts) => keycloakService.login(opts);
+  const logout = () => keycloakService.logout();
 
   const value = {
     isAuthenticated,
@@ -37,7 +37,6 @@ export function AuthProvider({ children }) {
     login,
     logout,
     profile,
-    token: keycloak.token,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

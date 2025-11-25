@@ -1,7 +1,9 @@
-import app from './app.js';
+// backend/server.js
+import "dotenv/config"; // reemplazo de require('dotenv').config()
+import app from "./app.js";
 
-const PORT = 3000;
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`Backend FinTrack running on http://localhost:${PORT}`);
+  console.log(`Backend escuchando en http://localhost:${PORT}`);
 });
