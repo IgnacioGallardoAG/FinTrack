@@ -10,16 +10,15 @@ export class ImportAppService extends ImportPort {
         this.securityPort = securityPort;
     }
 
-    /**
-     * CU-06: Validar CSV (no guarda nada)
-     */
+    // =====================================================
+    // CU-06 — Validar CSV (no guarda nada)
+    // =====================================================
     async validateCSV(file, userId) {
         if (!file) {
-            throw new Error('No se recibió archivo para validar.');
+            throw new Error("No se recibió archivo para validar.");
         }
-
         if (!userId) {
-            throw new Error('No se pudo obtener userId desde Keycloak.');
+            throw new Error("No se pudo obtener userId desde Keycloak.");
         }
 
         const { buffer, originalname, mimetype, size } = file;
@@ -31,49 +30,49 @@ export class ImportAppService extends ImportPort {
             fileName: originalname,
             mimeType: mimetype,
             size,
-            ...validation,   // preview, validRows, invalidRows, errorRows, etc.
+            ...validation,   // preview, validRows, errorRows, etc.
         };
     }
 
-    /**
-     * CU-05: Importar CSV (incluye CU-06)
-     */
+    // =====================================================
+    // CU-05 — Importar CSV (importación parcial SIEMPRE)
+    // =====================================================
     async importCSV(file, userId) {
-        // 1. Validación completa
+        // 1. Validación completa (sin bloquear por errores)
         const validation = await this.validateCSV(file, userId);
 
-        if (!validation.isValid) {
-            throw new Error('El CSV no es válido. No se puede importar.');
-        }
+        const validRows = validation.validRows ?? [];
+        const invalidRows = validation.invalidRows ?? [];
+        const errorRows = validation.errorRows ?? [];
 
-        // 2. Usamos TODAS las filas válidas
-        const rows = validation.validRows;
+        // 2. Transformar SOLO filas válidas
         const transactions = [];
 
-        for (const row of rows) {
+        for (const row of validRows) {
             try {
                 const tx = TransactionFactory.fromRow(row);
-                tx.userId = userId;   // asignación para trazabilidad
+                tx.userId = userId;
                 transactions.push(tx);
             } catch (e) {
-                console.warn('Fila descartada por error de dominio:', e.message);
+                console.warn("Fila descartada por error de dominio:", e.message);
             }
         }
 
-        // 3. Guardar en repositorio
+        // 3. Persistencia real (solo válidas)
         await this.importRepository.saveMany(transactions);
 
-        // 4. Resultado coherente con HU-04 / HU-05
+        // 4. Respuesta final
         return {
             userId,
             fileName: validation.fileName,
             imported: transactions.length,
-            failed: validation.invalidCount,
-            errors: validation.errorRows,
+            failed: invalidRows.length,
             total: validation.totalRows,
-            valid: validation.validCount,
-            invalid: validation.invalidCount,
-            summary: `Se importaron ${transactions.length} transacciones y ${validation.invalidCount} fueron rechazadas.`,
+            valid: validRows.length,
+            invalid: invalidRows.length,
+            errors: errorRows,
+            summary: `Se importaron ${transactions.length} transacciones. ` +
+                     `${invalidRows.length} filas fueron rechazadas.`
         };
     }
 }

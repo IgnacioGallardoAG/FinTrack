@@ -32,7 +32,6 @@ export default function ImportarCSV() {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      // Llevar el resultado a ValidarCSV.jsx
       navigate("/validar", { state: { ...res.data, originalFile: file } });
 
     } catch (error) {
@@ -61,7 +60,7 @@ export default function ImportarCSV() {
               textAlign: "center",
             }}
           >
-            <input type="file" accept=".csv, .xlsx" onChange={handleFileChange} />
+            <input type="file" accept=".csv" onChange={handleFileChange} />
 
             {fileName && (
               <p style={{ fontSize: "0.8rem", marginTop: "0.5rem" }}>

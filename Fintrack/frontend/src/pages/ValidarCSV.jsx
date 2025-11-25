@@ -21,11 +21,8 @@ export default function ValidarCSV() {
 
   const {
     preview,
-    validRows,
-    invalidRows,
     errorRows,
     errors,
-    isValid,
     fileName,
     originalFile,
     totalRows,
@@ -42,9 +39,13 @@ export default function ValidarCSV() {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      alert("Importación completada");
-      navigate("/dashboard");
+      alert(
+        `Importación completada.\n\n` +
+        `✔ Filas válidas importadas: ${validCount}\n` +
+        `✖ Filas rechazadas: ${invalidCount}`
+      );
 
+      navigate("/dashboard");
     } catch (error) {
       console.error("Error al confirmar importación:", error);
       alert("No se pudo completar la importación");
@@ -52,7 +53,14 @@ export default function ValidarCSV() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f3f4f6", display: "flex", flexDirection: "column" }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#f3f4f6",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       <NavbarDashboard useInternalState={false} />
 
       <main className="app-content" style={{ flex: 1, padding: "2rem" }}>
@@ -66,6 +74,13 @@ export default function ValidarCSV() {
             <li>Válidas: {validCount}</li>
             <li>Inválidas: {invalidCount}</li>
           </ul>
+
+          {invalidCount > 0 && (
+            <p style={{ color: "red", marginTop: "0.5rem" }}>
+              ⚠ Existen {invalidCount} filas inválidas.  
+              Solo se importarán las {validCount} filas correctas.
+            </p>
+          )}
         </section>
 
         <div className="grid-2" style={{ marginTop: "1rem" }}>
@@ -125,10 +140,9 @@ export default function ValidarCSV() {
         <button
           className="btn btn-primary"
           style={{ marginTop: "2rem", width: "100%" }}
-          disabled={!isValid}
           onClick={handleImport}
         >
-          Confirmar importación
+          Finalizar e importar ({validCount} filas válidas)
         </button>
       </main>
 
