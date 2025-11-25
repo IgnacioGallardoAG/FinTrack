@@ -2,18 +2,23 @@ import { TransactionFactory } from '../domain/transactionFactory.js';
 import { ImportPort } from '../ports/importPort.js';
 
 export class ImportAppService extends ImportPort {
-    constructor({ csvValidator, importRepository }) {
+
+    constructor({ csvValidator, importRepository, securityPort }) {
         super();
         this.csvValidator = csvValidator;
         this.importRepository = importRepository;
+        this.securityPort = securityPort;
     }
 
-    /**
-     * CU-06 Validar Importación (usado también como parte de CU-05).
-     */
-    async validateCSV(file) {
+    // =====================================================
+    // CU-06 — Validar CSV (no guarda nada)
+    // =====================================================
+    async validateCSV(file, userId) {
         if (!file) {
-            throw new Error('No se recibió archivo para validar.');
+            throw new Error("No se recibió archivo para validar.");
+        }
+        if (!userId) {
+            throw new Error("No se pudo obtener userId desde Keycloak.");
         }
 
         const { buffer, originalname, mimetype, size } = file;
@@ -21,41 +26,53 @@ export class ImportAppService extends ImportPort {
         const validation = await this.csvValidator.validate(buffer);
 
         return {
+            userId,
             fileName: originalname,
             mimeType: mimetype,
             size,
-            ...validation,
+            ...validation,   // preview, validRows, errorRows, etc.
         };
     }
 
-    /**
-     * CU-05 Importar CSV (incluye CU-06).
-     */
-    async importCSV(file) {
-        const validation = await this.validateCSV(file);
+    // =====================================================
+    // CU-05 — Importar CSV (importación parcial SIEMPRE)
+    // =====================================================
+    async importCSV(file, userId) {
+        // 1. Validación completa (sin bloquear por errores)
+        const validation = await this.validateCSV(file, userId);
 
-        if (!validation.isValid) {
-            throw new Error('El CSV no es válido. No se puede importar.');
-        }
+        const validRows = validation.validRows ?? [];
+        const invalidRows = validation.invalidRows ?? [];
+        const errorRows = validation.errorRows ?? [];
 
-        const rows = validation.preview; // En una versión real usaríamos TODAS las filas
+        // 2. Transformar SOLO filas válidas
         const transactions = [];
 
-        for (const row of rows) {
+        for (const row of validRows) {
             try {
                 const tx = TransactionFactory.fromRow(row);
+                tx.userId = userId;
                 transactions.push(tx);
             } catch (e) {
-                // Podríamos acumular errores por fila si quieres algo más detallado
-                console.warn('Fila descartada por error de dominio:', e.message);
+                console.warn("Fila descartada por error de dominio:", e.message);
             }
         }
 
+        // 3. Persistencia real (solo válidas)
         await this.importRepository.saveMany(transactions);
 
+        // 4. Respuesta final
         return {
-            imported: transactions.length,
+            userId,
             fileName: validation.fileName,
+            imported: transactions.length,
+            failed: invalidRows.length,
+            total: validation.totalRows,
+            valid: validRows.length,
+            invalid: invalidRows.length,
+            errors: errorRows,
+            summary: `Se importaron ${transactions.length} transacciones. ` +
+                     `${invalidRows.length} filas fueron rechazadas.`
         };
     }
 }

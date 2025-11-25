@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api/apiClient";
+import apiClient from "../api/apiClient";
 import Footer from "../components/Footer";
 import NavbarDashboard from "../components/NavbarDashboard";
 
 export default function ImportarCSV() {
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState(null);
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
 
   const handleFileChange = (event) => {
@@ -20,18 +22,23 @@ export default function ImportarCSV() {
   const handleValidate = async () => {
     if (!file) return;
 
-    const form = new FormData();
-    form.append("file", file);
+    setLoading(true);
 
     try {
-      const res = await api.post("/validate", form);
+      const formData = new FormData();
+      formData.append("file", file);
 
-      // Pasar el resultado a la pantalla ValidarCSV
-      navigate("/validar", { state: res.data });
+      const res = await apiClient.post("/api/validate", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      navigate("/validar", { state: { ...res.data, originalFile: file } });
 
     } catch (error) {
       console.error("Error al validar CSV:", error);
       alert("Error al validar el archivo");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -64,11 +71,11 @@ export default function ImportarCSV() {
 
           <button
             className="btn btn-secondary"
-            style={{ marginTop: "1rem" }}
+            style={{ marginTop: "1rem", width: "100%" }}
             onClick={handleValidate}
-            disabled={!file}
+            disabled={!file || loading}
           >
-            Validar archivo
+            {loading ? "Validando..." : "Validar archivo"}
           </button>
         </div>
       </main>
